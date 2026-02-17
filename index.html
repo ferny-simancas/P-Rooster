@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P-Rooster | Roost your mind</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        /* --- ESTILOS GENERALES --- */
+        :root {
+            --bg: #000; --card: #16181c; --text: #fff; --subtext: #71767b;
+            --red: #D90429; --orange: #FF9F1C; --border: #2f3336;
+        }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; overflow-y: scroll; }
+        
+        /* LAYOUT PRINCIPAL */
+        .layout {
+            display: flex;
+            justify-content: center;
+            max-width: 1250px;
+            margin: 0 auto;
+            min-height: 100vh;
+            gap: 20px;
+        }
+
+        /* --- COLUMNA IZQUIERDA (DASHBOARD) --- */
+        .sidebar-left {
+            width: 280px;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 10px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        .sidebar-left::-webkit-scrollbar { width: 4px; }
+        .sidebar-left::-webkit-scrollbar-thumb { background: #333; }
+
+        /* --- COLUMNA CENTRAL (FEED) --- */
+        .main-feed {
+            width: 600px;
+            border-left: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            min-height: 100vh;
+        }
+
+        /* --- COLUMNA DERECHA (WIDGETS) --- */
+        .sidebar-right {
+            width: 300px;
+            padding: 20px 10px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        .sidebar-right::-webkit-scrollbar { width: 4px; }
+        .sidebar-right::-webkit-scrollbar-thumb { background: #333; }
+
+        /* ESTILOS WIDGETS */
+        .widget { background: #16181c; border-radius: 16px; padding: 15px; margin-bottom: 15px; border: 1px solid #2f3336; }
+        .widget-title { font-weight: 800; font-size: 0.95rem; margin-bottom: 12px; color: var(--text); border-bottom: 1px solid #333; padding-bottom: 8px;}
+        
+        /* Lista Apps Educativas */
+        .edu-list { max-height: 400px; overflow-y: auto; padding-right: 5px; }
+        .edu-list::-webkit-scrollbar { width: 4px; }
+        .edu-list::-webkit-scrollbar-thumb { background: var(--red); border-radius: 2px;}
+        .edu-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #2f3336; font-size: 0.9rem; }
+        .edu-item:last-child { border: none; }
+        .edu-link { color: var(--orange); text-decoration: none; font-weight: bold; transition: 0.2s; }
+        .edu-link:hover { color: #fff; text-decoration: underline; }
+
+        /* Dashboard Items */
+        .mini-list-item { padding: 8px 0; border-bottom: 1px solid #2f3336; font-size: 0.9rem; }
+        .rank-user { display: flex; justify-content: space-between; align-items: center; }
+        .rank-badge { background: #333; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; }
+        .trend-tag { color: var(--red); font-weight: bold; cursor: pointer; }
+        .trend-count { color: #666; font-size: 0.8rem; }
+        
+        .profile-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .profile-avatar { width: 40px; height: 40px; background: var(--orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: black; font-size: 1.2rem; }
+
+        /* RESPONSIVE */
+        @media (max-width: 1000px) {
+            .sidebar-left { display: none; }
+            .sidebar-right { display: none; }
+            .main-feed { width: 100%; border: none; }
+            .mobile-header { display: flex !important; }
+        }
+
+        /* UI ELEMENTS */
+        .big-roost-btn {
+            background: var(--red); color: white; border: none; padding: 12px;
+            border-radius: 30px; font-weight: bold; font-size: 1rem; cursor: pointer;
+            width: 100%; margin-bottom: 20px; transition: 0.2s;
+        }
+        .big-roost-btn:hover { transform: scale(1.02); }
+        input[type="text"] { width:100%; box-sizing:border-box; border-radius:20px; background:#202327; border:none; padding:12px; color:white; outline:none; }
+        input[type="text"]:focus { background:black; border:1px solid var(--orange); }
+
+        /* PANTALLAS */
+        #login-screen { position: fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:2000; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+        #app-screen { display:none; width: 100%; }
+
+        /* FEED & CARDS */
+        .mobile-header { display:none; padding:10px; border-bottom:1px solid var(--border); align-items:center; justify-content:space-between; position:sticky; top:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); z-index:100; }
+        .rooster-card { padding:15px; border-bottom:1px solid var(--border); display:flex; gap:12px; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        .vip-scroll { display:flex; overflow-x:auto; gap:15px; padding:15px; background:linear-gradient(180deg, rgba(217,4,41,0.05) 0%, rgba(0,0,0,0) 100%); border-bottom:1px solid var(--border); }
+        .vip-card { min-width:240px; background:#1e2024; padding:12px; border-radius:12px; border:1px solid #333; color:#ddd; font-size:0.9rem; }
+        
+        input[type="email"], input[type="password"] { background:#202327; border:1px solid #333; color:white; padding:12px; margin:5px; width:280px; border-radius:5px; outline:none; }
+        .btn-main { background:white; color:black; padding:10px 30px; border-radius:20px; margin-top:10px; border:none; cursor:pointer; font-weight:bold;}
+        textarea { width:100%; background:transparent; border:none; color:white; font-size:1.2rem; resize:none; outline:none; font-family:inherit; }
+        .vote-col { display:flex; flex-direction:column; align-items:center; min-width:40px; }
+        .vote-btn { background:none; color:#555; font-size:1.4rem; padding:0; border:none; cursor:pointer;}
+        .voted-active { color: var(--orange) !important; cursor: default !important; }
+        .voted-disabled { color: #333 !important; cursor: default !important; pointer-events: none; }
+        .btn-roost { background:var(--red); color:white; padding:8px 20px; border-radius:20px; opacity:0.5; pointer-events:none; border:none; cursor:pointer; font-weight:bold;}
+        .btn-roost.active { opacity:1; pointer-events:auto; }
+        
+        .roost-date { font-size: 0.8rem; color: var(--subtext); margin-left: 8px; font-weight: normal; }
+
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <img src="https://i.ibb.co/1tXC0vtQ/2.png" style="width:80px; margin-bottom:20px;">
+        <h2 style="margin-bottom:20px; font-weight:800;">Bienvenido a P-Rooster</h2>
+        <input type="email" id="emailInput" placeholder="Correo electrónico">
+        <input type="password" id="passInput" placeholder="Contraseña">
+        <div style="margin-top:15px; display:flex; gap:10px;">
+            <button class="btn-main" onclick="iniciarSesion()">Entrar</button>
+            <button class="btn-main" style="background:var(--red); color:white;" onclick="registrarse()">Registrarme</button>
+        </div>
+        <p id="errorMsg" style="color:var(--red); font-size:0.9rem; margin-top:15px;"></p>
+    </div>
+
+    <div id="app-screen">
+        <div class="layout">
+            
+            <div class="sidebar-left">
+                <div style="margin-bottom: 20px; padding-left: 10px;">
+                    <img src="https://i.ibb.co/1tXC0vtQ/2.png" style="height:50px;">
+                </div>
+                <button class="big-roost-btn" onclick="document.getElementById('roostInput').focus()">ROOSTEAR</button>
+
+                <div class="widget">
+                    <div class="profile-header">
+                        <div class="profile-avatar">YO</div>
+                        <div><div id="left-username" style="font-weight: bold;">@Usuario</div><div style="font-size: 0.8rem; color: #777;">Miembro</div></div>
+                    </div>
+                    <div class="widget-title">Mis Últimos Roosters</div>
+                    <div id="left-profile-feed"><div style="font-size:0.8rem; color:#666;">Cargando...</div></div>
+                </div>
+                
+                <div class="widget">
+                    <div class="widget-title" style="color: var(--red);"># Roostrends</div>
+                    <div id="left-trends"></div>
+                </div>
+
+                <div class="widget">
+                    <div class="widget-title">🏆 Top Roosters</div>
+                    <div id="left-top-users"></div>
+                </div>
+
+                <div onclick="cerrarSesion()" style="cursor:pointer; color:#666; font-size:0.9rem; padding:10px; text-align:center;">🚪 Cerrar Sesión</div>
+            </div>
+
+            <div class="main-feed">
+                <div class="mobile-header">
+                    <img src="https://i.ibb.co/1tXC0vtQ/2.png" style="height:30px;">
+                    <button onclick="cerrarSesion()" style="background:none; color:var(--red); border:none;">Salir</button>
+                </div>
+                <div style="padding:15px; border-bottom:1px solid var(--border);">
+                    <textarea id="roostInput" rows="2" placeholder="¿Qué quieres roostear hoy? (Usa #hashtags)" oninput="checkInput()"></textarea>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+                        <span id="charCount" style="color:#555; font-size:0.9rem;">0/300</span>
+                        <button id="roostBtn" class="btn-roost" onclick="publicar()">ROOST</button>
+                    </div>
+                </div>
+                <div id="vip-area" style="display:none;">
+                    <div style="padding:15px 15px 0; color:var(--orange); font-weight:800; font-size:0.8rem; text-transform:uppercase;">🔥 El Gallinero (Top 5)</div>
+                    <div class="vip-scroll" id="vip-feed"></div>
+                </div>
+                <div style="padding:20px 15px 5px; color:var(--subtext); font-weight:800; font-size:0.8rem; text-transform:uppercase;">📅 Recientes</div>
+                <div id="main-feed"></div>
+            </div>
+
+            <div class="sidebar-right">
+                <div style="margin-bottom:20px;">
+                    <input type="text" id="searchInput" oninput="filtrarBusqueda()" placeholder="🔍 Buscar usuarios o mensajes..." autocomplete="off">
+                </div>
+
+                <div class="widget">
+                    <div class="widget-title">📜 Reglas de Convivencia</div>
+                    <ul style="padding-left:20px; margin:0; font-size:0.9rem; color:var(--subtext); line-height:1.6;">
+                        <li><b>Respeto:</b> Sin insultos ni acoso.</li>
+                        <li><b>Veracidad:</b> No difundir Fake News.</li>
+                        <li><b>Privacidad:</b> No publicar datos ajenos.</li>
+                        <li><b>Contenido:</b> Prohibido material NSFW.</li>
+                    </ul>
+                </div>
+
+                <div class="widget">
+                    <div class="widget-title">📚 Herramientas Educativas</div>
+                    <div class="edu-list">
+                        <div class="edu-item"><span>Google Classroom</span><a href="https://classroom.google.com" target="_blank" class="edu-link">Visitar</a></div>
+                        <div class="edu-item"><span>Kahoot!</span><a href="https://kahoot.com" target="_blank" class="edu-link">Visitar</a></div>
+                        <div class="edu-item"><span>Duolingo</span><a href="https://es.duolingo.com" target="_blank" class="edu-link">Visitar</a></div>
+                        <div class="edu-item"><span>Khan Academy</span><a href="https://es.khanacademy.org" target="_blank" class="edu-link">Visitar</a></div>
+                        <div class="edu-item"><span>Canva Educación</span><a href="https://www.canva.com/es_es/educacion/" target="_blank" class="edu-link">Visitar</a></div>
+                        <div class="edu-item"><span>Quizizz</span><a href="https://quizizz.com" target="_blank" class="edu-link">Visitar</a></div>
+                        <div class="edu-item"><span>Edmodo</span><a href="https://new.edmodo.com" target="_blank" class="edu-link">Visitar</a></div>
+                        <div class="edu-item"><span>Coursera</span><a href="https://www.coursera.org" target="_blank" class="edu-link">Visitar</a></div>
+                        <div class="edu-item"><span>Padlet</span><a href="https://es.padlet.com" target="_blank" class="edu-link">Visitar</a></div>
+                        <div class="edu-item"><span>Genially</span><a href="https://genial.ly/es/" target="_blank" class="edu-link">Visitar</a></div>
+                        <div class="edu-item"><span>Prezi</span><a href="https://prezi.com/es/" target="_blank" class="edu-link">Visitar</a></div>
+                        <div class="edu-item"><span>Scratch</span><a href="https://scratch.mit.edu" target="_blank" class="edu-link">Visitar</a></div>
+                        <div class="edu-item"><span>Socrative</span><a href="https://www.socrative.com" target="_blank" class="edu-link">Visitar</a></div>
+                        <div class="edu-item"><span>ClassDojo</span><a href="https://www.classdojo.com/es-es/" target="_blank" class="edu-link">Visitar</a></div>
+                        <div class="edu-item"><span>Nearpod</span><a href="https://nearpod.com" target="_blank" class="edu-link">Visitar</a></div>
+                        <div class="edu-item"><span>TED-Ed</span><a href="https://ed.ted.com" target="_blank" class="edu-link">Visitar</a></div>
+                        <div class="edu-item"><span>Udemy</span><a href="https://www.udemy.com" target="_blank" class="edu-link">Visitar</a></div>
+                        <div class="edu-item"><span>Edpuzzle</span><a href="https://edpuzzle.com" target="_blank" class="edu-link">Visitar</a></div>
+                        <div class="edu-item"><span>Moodle</span><a href="https://moodle.org" target="_blank" class="edu-link">Visitar</a></div>
+                        <div class="edu-item"><span>Flip</span><a href="https://info.flip.com" target="_blank" class="edu-link">Visitar</a></div>
+                    </div>
+                </div>
+                
+                <div style="font-size:0.8rem; color:#555; padding:10px;">© 2026 P-Rooster Inc.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC7aGUM7dJliyvuxQHrBbvlcKTvjIcLASc",
+            authDomain: "p-rooster.firebaseapp.com",
+            projectId: "p-rooster",
+            storageBucket: "p-rooster.firebasestorage.app",
+            messagingSenderId: "925903630132",
+            appId: "1:925903630132:web:60ebb8b086582ee25b3f61"
+        };
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.firestore();
+            const auth = firebase.auth();
+            let currentUser = null;
+            let globalRoosters = [];
+
+            // --- AUTH ---
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    currentUser = user;
+                    document.getElementById('left-username').innerText = "@" + user.email.split('@')[0];
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('app-screen').style.display = 'block';
+                    cargarRoosters();
+                } else {
+                    currentUser = null;
+                    document.getElementById('login-screen').style.display = 'flex';
+                    document.getElementById('app-screen').style.display = 'none';
+                }
+            });
+
+            window.iniciarSesion = () => {
+                const e = document.getElementById('emailInput').value;
+                const p = document.getElementById('passInput').value;
+                auth.signInWithEmailAndPassword(e, p).catch(err => mostrarError(err.message));
+            }
+            window.registrarse = () => {
+                const e = document.getElementById('emailInput').value;
+                const p = document.getElementById('passInput').value;
+                auth.createUserWithEmailAndPassword(e, p).then(()=>alert("¡Cuenta creada!")).catch(err => mostrarError(err.message));
+            }
+            window.cerrarSesion = () => auth.signOut();
+            function mostrarError(msg) { document.getElementById('errorMsg').innerText = msg; }
+
+            // --- ROOSTS ---
+            window.checkInput = () => {
+                const len = document.getElementById('roostInput').value.length;
+                document.getElementById('charCount').innerText = len + "/300";
+                const btn = document.getElementById('roostBtn');
+                if(len>0 && len<=300) btn.classList.add('active'); else btn.classList.remove('active');
+            }
+
+            window.publicar = () => {
+                const txt = document.getElementById('roostInput').value;
+                const exp = new Date(); exp.setMonth(exp.getMonth()+6);
+                db.collection("roosters").add({
+                    content: txt, author: currentUser.email.split('@')[0], uid: currentUser.uid,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(), expireAt: exp, votes: 0, votedBy: []
+                });
+                document.getElementById('roostInput').value = ""; checkInput();
+            }
+
+            window.votar = (id, n) => {
+                const card = document.getElementById('card-' + id);
+                if (card && card.classList.contains('user-has-voted')) { alert("Ya votaste."); return; }
+                db.collection("roosters").doc(id).update({
+                    votes: firebase.firestore.FieldValue.increment(n),
+                    votedBy: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+                });
+            }
+
+            // --- BUSCADOR ---
+            window.filtrarBusqueda = () => {
+                const texto = document.getElementById('searchInput').value.toLowerCase();
+                if(!texto) { renderizarFeedCentral(globalRoosters); return; }
+                const filtrados = globalRoosters.filter(r => r.content.toLowerCase().includes(texto) || r.author.toLowerCase().includes(texto));
+                renderizarFeedCentral(filtrados);
+            }
+
+            function cargarRoosters() {
+                db.collection("roosters").orderBy("createdAt", "desc").onSnapshot(snap => {
+                    const lista = [];
+                    snap.forEach(d => lista.push({id: d.id, ...d.data()}));
+                    globalRoosters = lista;
+                    
+                    const textoBusqueda = document.getElementById('searchInput').value;
+                    if(textoBusqueda) window.filtrarBusqueda(); else renderizarFeedCentral(lista);
+                    
+                    actualizarSidebarIzquierda(lista);
+                });
+            }
+
+            // --- RENDERIZADO LATERAL ---
+            function actualizarSidebarIzquierda(lista) {
+                // 1. Top Users
+                const conteo = {};
+                lista.forEach(r => conteo[r.author] = (conteo[r.author] || 0) + 1);
+                const ranking = Object.entries(conteo).sort((a,b) => b[1] - a[1]).slice(0, 5);
+                const topDiv = document.getElementById('left-top-users');
+                topDiv.innerHTML = "";
+                ranking.forEach((u, i) => topDiv.innerHTML += `<div class="mini-list-item rank-user"><span>${i+1}. @${u[0]}</span><span class="rank-badge">${u[1]} Roosts</span></div>`);
+
+                // 2. Perfil
+                const misPosts = lista.filter(r => r.uid === currentUser.uid).slice(0, 3);
+                const profDiv = document.getElementById('left-profile-feed');
+                profDiv.innerHTML = misPosts.length ? "" : '<div style="font-size:0.8rem; color:#666;">Sin posts.</div>';
+                misPosts.forEach(r => profDiv.innerHTML += `<div class="mini-list-item" style="color:#aaa;">"${r.content.substring(0,30)}..."</div>`);
+
+                // 3. ROOSTRENDS (HASHTAGS) - LÓGICA NUEVA
+                const todosLosTextos = lista.map(r => r.content).join(" ");
+                // Regex para encontrar #palabra
+                const hashtags = todosLosTextos.match(/#[\wñáéíóú]+/gi) || [];
+                const conteoTags = {};
+                hashtags.forEach(tag => conteoTags[tag] = (conteoTags[tag] || 0) + 1);
+                
+                const rankingTags = Object.entries(conteoTags).sort((a,b) => b[1] - a[1]).slice(0, 5);
+                
+                const trendsDiv = document.getElementById('left-trends');
+                trendsDiv.innerHTML = "";
+                if (rankingTags.length > 0) {
+                    rankingTags.forEach(t => {
+                        trendsDiv.innerHTML += `
+                            <div class="mini-list-item rank-user" onclick="document.getElementById('searchInput').value='${t[0]}'; window.filtrarBusqueda();">
+                                <span class="trend-tag">${t[0]}</span>
+                                <span class="trend-count">${t[1]} roosts</span>
+                            </div>`;
+                    });
+                } else {
+                    trendsDiv.innerHTML = '<div style="font-size:0.8rem; color:#666;">No hay tendencias aún.</div>';
+                }
+            }
+
+            function renderizarFeedCentral(lista) {
+                const main = document.getElementById('main-feed');
+                const vip = document.getElementById('vip-feed');
+                const vipArea = document.getElementById('vip-area');
+                main.innerHTML = ""; vip.innerHTML = "";
+                
+                // VIP
+                const top = [...globalRoosters].sort((a,b)=>b.votes-a.votes).slice(0,5);
+                if(top.length>0 && top[0].votes>0) {
+                    vipArea.style.display = "block";
+                    top.forEach(r => {
+                        if(r.votes<=0) return;
+                        const yaVoto = r.votedBy && r.votedBy.includes(currentUser.uid);
+                        vip.innerHTML += `
+                        <div class="vip-card">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                                <span style="color:var(--orange); font-weight:bold;">@${r.author}</span>
+                                <span style="background:var(--orange); color:black; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:0.75rem;">★ ${r.votes}</span>
+                            </div>
+                            <div style="font-size:0.9rem; line-height:1.4; color:#ddd;">${r.content.substring(0,80)}...</div>
+                            <button ${yaVoto?'':'onclick="votar(\''+r.id+'\',1)"'} style="margin-top:8px; background:none; border:1px solid #444; color:${yaVoto?'var(--orange)':'#aaa'}; border-radius:15px; padding:2px 10px; font-size:0.8rem; cursor:${yaVoto?'default':'pointer'};">${yaVoto?'✔ Votado':'▲ Votar'}</button>
+                        </div>`;
+                    });
+                } else vipArea.style.display = "none";
+
+                // MAIN
+                if(lista.length === 0) { main.innerHTML = "<div style='padding:20px; text-align:center; color:#555;'>No se encontraron resultados.</div>"; return; }
+
+                lista.forEach(r => {
+                    const yaVoto = r.votedBy && r.votedBy.includes(currentUser.uid);
+                    
+                    // FORMATEAR FECHA
+                    let fechaStr = "";
+                    if (r.createdAt && r.createdAt.toDate) {
+                        const fechaObj = r.createdAt.toDate();
+                        fechaStr = fechaObj.toLocaleDateString() + ' ' + fechaObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    }
+
+                    main.innerHTML += `
+                    <div class="rooster-card ${yaVoto?'user-has-voted':''}" id="card-${r.id}">
+                        <div class="vote-col">
+                            <button class="vote-btn ${yaVoto?'voted-active':''}" ${yaVoto?'':'onclick="votar(\''+r.id+'\',1)"'}>▲</button>
+                            <span style="font-weight:bold; margin:5px 0; color:${r.votes>0?'var(--orange)':'white'}">${r.votes}</span>
+                            <button class="vote-btn ${yaVoto?'voted-disabled':''}" ${yaVoto?'':'onclick="votar(\''+r.id+'\',-1)"'}>▼</button>
+                        </div>
+                        <div style="width:100%;">
+                            <div style="font-weight:bold; margin-bottom:5px; display:flex; align-items:baseline;">
+                                @${r.author}
+                                <span class="roost-date">${fechaStr}</span>
+                            </div>
+                            <div style="color:#e7e9ea; line-height:1.5; white-space:pre-wrap;">${r.content}</div>
+                        </div>
+                    </div>`;
+                });
+            }
+
+        } catch (e) { console.error(e); }
+    </script>
+</body>
+</html>
