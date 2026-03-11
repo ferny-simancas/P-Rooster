@@ -10,15 +10,14 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <style>
-        /* --- ESTILOS GENERALES FLUENT DESIGN (MICROSOFT 2026) --- */
+        /* --- ESTILOS GENERALES FLUENT DESIGN --- */
         :root {
-            /* Paleta moderna y llamativa */
             --bg-base: #0c0c0c;
-            --card-bg: rgba(30, 33, 36, 0.65); /* Efecto Mica/Acrylic */
+            --card-bg: rgba(30, 33, 36, 0.65);
             --card-border: rgba(255, 255, 255, 0.08);
             --text-main: #f3f3f3;
             --text-sub: #9ca3af;
-            --accent-primary: #4cc2ff; /* Windows Blue moderno */
+            --accent-primary: #4cc2ff;
             --accent-gradient: linear-gradient(135deg, #0078D4, #8A2BE2);
             --danger: #ff5959;
             --hover-bg: rgba(255, 255, 255, 0.06);
@@ -29,7 +28,6 @@
 
         body { 
             background-color: var(--bg-base); 
-            /* Fondo inspirado en el "Bloom" de Windows */
             background-image: 
                 radial-gradient(circle at 15% 0%, rgba(0, 120, 212, 0.15), transparent 30%),
                 radial-gradient(circle at 85% 100%, rgba(138, 43, 226, 0.12), transparent 40%);
@@ -40,30 +38,11 @@
             overflow-y: scroll; 
         }
         
-        /* LAYOUT PRINCIPAL */
-        .layout {
-            display: flex;
-            justify-content: center;
-            max-width: 1250px;
-            margin: 0 auto;
-            min-height: 100vh;
-            gap: 24px;
-            padding: 0 10px;
-        }
-
-        /* --- COLUMNAS --- */
-        .sidebar-left, .sidebar-right {
-            padding: 24px 10px;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            box-sizing: border-box;
-            overflow-y: auto;
-        }
+        .layout { display: flex; justify-content: center; max-width: 1250px; margin: 0 auto; min-height: 100vh; gap: 24px; padding: 0 10px; }
+        .sidebar-left, .sidebar-right { padding: 24px 10px; position: sticky; top: 0; height: 100vh; box-sizing: border-box; overflow-y: auto; }
         .sidebar-left { width: 280px; display: flex; flex-direction: column; }
         .sidebar-right { width: 320px; }
 
-        /* Scrollbars estilo Windows */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
@@ -79,36 +58,20 @@
             box-shadow: 0 0 40px rgba(0,0,0,0.3);
         }
 
-        /* ESTILOS WIDGETS (Efecto Glassmorphism) */
         .widget { 
-            background: var(--card-bg); 
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: var(--radius-md); 
-            padding: 18px; 
-            margin-bottom: 20px; 
-            border: 1px solid var(--card-border); 
-            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            background: var(--card-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border-radius: var(--radius-md); padding: 18px; margin-bottom: 20px; border: 1px solid var(--card-border); box-shadow: 0 4px 24px rgba(0,0,0,0.2);
         }
-        .widget-title { 
-            font-weight: 600; 
-            font-size: 1rem; 
-            margin-bottom: 16px; 
-            color: var(--text-main); 
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
+        .widget-title { font-weight: 600; font-size: 1rem; margin-bottom: 16px; color: var(--text-main); padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         
-        /* Listas y Links */
         .edu-list { max-height: 350px; overflow-y: auto; padding-right: 8px; }
         .edu-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 8px; border-radius: var(--radius-sm); font-size: 0.9rem; transition: 0.2s; }
         .edu-item:hover { background: var(--hover-bg); }
         .edu-link { color: var(--accent-primary); text-decoration: none; font-weight: 600; transition: 0.2s; }
         .edu-link:hover { text-shadow: 0 0 8px rgba(76, 194, 255, 0.5); }
 
-        /* Dashboard Items */
-        .mini-list-item { padding: 10px 8px; border-radius: var(--radius-sm); font-size: 0.9rem; transition: 0.2s; }
-        .mini-list-item:hover { background: var(--hover-bg); cursor: pointer; }
+        .mini-list-item { padding: 10px 8px; border-radius: var(--radius-sm); font-size: 0.9rem; transition: 0.2s; cursor: pointer; }
+        .mini-list-item:hover { background: var(--hover-bg); }
         .rank-user { display: flex; justify-content: space-between; align-items: center; }
         .rank-badge { background: rgba(255,255,255,0.1); border: 1px solid var(--card-border); color: var(--text-main); padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
         .trend-tag { color: var(--accent-primary); font-weight: 600; }
@@ -117,91 +80,37 @@
         .profile-header { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
         .profile-avatar { width: 44px; height: 44px; background: var(--accent-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(138, 43, 226, 0.4); }
 
-        /* UI ELEMENTS */
-        .big-roost-btn {
-            background: var(--accent-gradient); 
-            color: white; 
-            border: 1px solid rgba(255,255,255,0.1); 
-            padding: 14px;
-            border-radius: var(--radius-lg); 
-            font-weight: 600; 
-            font-size: 1.05rem; 
-            cursor: pointer;
-            width: 100%; 
-            margin-bottom: 24px; 
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 15px rgba(0, 120, 212, 0.4);
-        }
+        .big-roost-btn { background: var(--accent-gradient); color: white; border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: var(--radius-lg); font-weight: 600; font-size: 1.05rem; cursor: pointer; width: 100%; margin-bottom: 24px; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(0, 120, 212, 0.4); }
         .big-roost-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(138, 43, 226, 0.5); filter: brightness(1.1); }
         
-        /* Inputs estilo Fluent */
-        input[type="text"], input[type="email"], input[type="password"] { 
-            width: 100%; 
-            box-sizing: border-box; 
-            border-radius: var(--radius-sm); 
-            background: rgba(255, 255, 255, 0.04); 
-            border: 1px solid var(--card-border); 
-            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-            padding: 12px 16px; 
-            color: white; 
-            outline: none; 
-            font-family: inherit;
-            transition: all 0.3s ease;
-        }
-        input:focus { 
-            background: rgba(255, 255, 255, 0.08); 
-            border-bottom-color: var(--accent-primary); 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
+        input[type="text"], input[type="email"], input[type="password"] { width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); background: rgba(255, 255, 255, 0.04); border: 1px solid var(--card-border); border-bottom: 2px solid rgba(255, 255, 255, 0.2); padding: 12px 16px; color: white; outline: none; font-family: inherit; transition: all 0.3s ease; }
+        input:focus { background: rgba(255, 255, 255, 0.08); border-bottom-color: var(--accent-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
-        /* PANTALLAS */
         #login-screen { position: fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-base); z-index:2000; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-        /* Tarjeta de Login estilo Windows */
-        .login-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border);
-            padding: 40px;
-            border-radius: var(--radius-md);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            text-align: center;
-            width: 100%;
-            max-width: 320px;
-        }
+        .login-card { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--card-border); padding: 40px; border-radius: var(--radius-md); box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 320px; }
         #app-screen { display:none; width: 100%; }
 
-        /* FEED & CARDS */
         .mobile-header { display:none; padding:12px 20px; border-bottom:1px solid var(--card-border); align-items:center; justify-content:space-between; position:sticky; top:0; background:rgba(20,20,20,0.8); backdrop-filter:blur(15px); z-index:100; }
         
-        .rooster-card { 
-            padding: 20px; 
-            border-bottom: 1px solid var(--card-border); 
-            display: flex; 
-            gap: 16px; 
-            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
-            transition: background 0.2s;
-        }
+        .rooster-card { padding: 20px; border-bottom: 1px solid var(--card-border); display: flex; gap: 16px; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); transition: background 0.2s; }
         .rooster-card:hover { background: rgba(255,255,255,0.02); }
         @keyframes fadeIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
         
         .vip-scroll { display:flex; overflow-x:auto; gap:16px; padding:20px; background:linear-gradient(180deg, rgba(0, 120, 212, 0.05) 0%, transparent 100%); border-bottom:1px solid var(--card-border); }
-        .vip-card { 
-            min-width: 260px; 
-            background: var(--card-bg); 
-            backdrop-filter: blur(10px);
-            padding: 16px; 
-            border-radius: var(--radius-md); 
-            border: 1px solid var(--card-border); 
-            color: #ddd; 
-            font-size: 0.95rem; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
+        .vip-card { min-width: 260px; background: var(--card-bg); backdrop-filter: blur(10px); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--card-border); color: #ddd; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(0,0,0,0.2); cursor: pointer; transition: 0.2s;}
+        .vip-card:hover { border-color: var(--accent-primary); transform: translateY(-2px); }
         
         .btn-main { background: rgba(255,255,255,0.9); color: black; padding: 10px 24px; border-radius: var(--radius-sm); margin-top: 15px; border: none; cursor: pointer; font-weight: 600; transition: 0.2s;}
         .btn-main:hover { background: white; transform: scale(1.02); }
         .btn-secondary { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 24px; border-radius: var(--radius-sm); margin-top: 15px; cursor: pointer; font-weight: 600; transition: 0.2s;}
         .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+        
+        /* BOTONES DE LA CABECERA DEL FEED */
+        .btn-refresh { background: transparent; border: 1px solid var(--accent-primary); color: var(--accent-primary); padding: 6px 14px; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-refresh:hover { background: rgba(76, 194, 255, 0.1); }
+        
+        .btn-close-filter { display: none; background: rgba(255, 89, 89, 0.1); border: 1px solid var(--danger); color: var(--danger); padding: 6px 14px; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-close-filter:hover { background: rgba(255, 89, 89, 0.2); }
 
         textarea { width: 100%; background: transparent; border: none; color: white; font-size: 1.1rem; resize: none; outline: none; font-family: inherit; margin-top: 10px;}
         textarea::placeholder { color: #666; }
@@ -218,10 +127,8 @@
         
         .roost-date { font-size: 0.8rem; color: var(--text-sub); margin-left: 10px; font-weight: normal; }
 
-        /* RESPONSIVE */
         @media (max-width: 1000px) {
-            .sidebar-left { display: none; }
-            .sidebar-right { display: none; }
+            .sidebar-left, .sidebar-right { display: none; }
             .main-feed { width: 100%; border: none; background: transparent; backdrop-filter: none; box-shadow: none; }
             .mobile-header { display: flex !important; }
         }
@@ -284,18 +191,28 @@
                     <img src="https://i.ibb.co/1tXC0vtQ/2.png" style="height:28px;">
                     <button onclick="cerrarSesion()" style="background:rgba(255,255,255,0.1); color:white; border:none; padding: 6px 12px; border-radius: 6px; font-weight: 600;">Salir</button>
                 </div>
-                <div style="padding:20px; border-bottom:1px solid var(--card-border); background: rgba(0,0,0,0.2);">
+                
+                <div id="input-container" style="padding:20px; border-bottom:1px solid var(--card-border); background: rgba(0,0,0,0.2);">
                     <textarea id="roostInput" rows="3" placeholder="¿Qué estás pensando? (Usa #hashtags)" oninput="checkInput()"></textarea>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05);">
                         <span id="charCount" style="color:var(--text-sub); font-size:0.85rem; font-weight: 600;">0/300</span>
                         <button id="roostBtn" class="btn-roost" onclick="publicar()">Publicar</button>
                     </div>
                 </div>
+                
                 <div id="vip-area" style="display:none;">
                     <div style="padding:20px 20px 0; color:var(--text-main); font-weight:600; font-size:0.9rem; letter-spacing: 0.5px;">DESTACADOS</div>
                     <div class="vip-scroll" id="vip-feed"></div>
                 </div>
-                <div style="padding:24px 20px 8px; color:var(--text-main); font-weight:600; font-size:0.9rem; letter-spacing: 0.5px;">LÍNEA DE TIEMPO</div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:24px 20px 8px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px;">
+                    <span id="feed-title" style="color:var(--text-main); font-weight:600; font-size:0.9rem; letter-spacing: 0.5px; text-transform: uppercase;">LÍNEA DE TIEMPO</span>
+                    <div>
+                        <button id="btn-close-filter" class="btn-close-filter" onclick="restaurarFeed()">✖ Cerrar</button>
+                        <button id="btn-refresh" class="btn-refresh" onclick="restaurarFeed()">↻ Actualizar</button>
+                    </div>
+                </div>
+                
                 <div id="main-feed"></div>
             </div>
 
@@ -352,6 +269,78 @@
             let currentUser = null;
             let globalRoosters = [];
 
+            // CONTROL DE ESTADO DE LA VISTA
+            let filtroActual = { tipo: 'ninguno', valor: '' };
+
+            // --- LÓGICA DE FILTRADO Y VISTAS ---
+            window.verDetalleRoost = (id) => {
+                filtroActual = { tipo: 'detalle', valor: id };
+                cambiarModoFeed(`👁 DETALLE DEL ROOST`);
+                aplicarFiltroActual();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            window.verUsuario = (author) => {
+                document.getElementById('searchInput').value = '';
+                filtroActual = { tipo: 'usuario', valor: author };
+                cambiarModoFeed(`👤 ROOSTS DE @${author}`);
+                aplicarFiltroActual();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            window.verTendencia = (tag) => {
+                document.getElementById('searchInput').value = '';
+                filtroActual = { tipo: 'tendencia', valor: tag.toLowerCase() };
+                cambiarModoFeed(`🔥 TENDENCIA: ${tag}`);
+                aplicarFiltroActual();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            window.filtrarBusqueda = () => {
+                const texto = document.getElementById('searchInput').value.toLowerCase();
+                if(texto) {
+                    filtroActual = { tipo: 'busqueda', valor: texto };
+                    cambiarModoFeed(`🔍 BÚSQUEDA: ${texto}`);
+                } else {
+                    // Si el usuario borra la búsqueda, restauramos el feed original
+                    if(filtroActual.tipo === 'busqueda') {
+                        window.restaurarFeed();
+                        return;
+                    }
+                }
+                aplicarFiltroActual();
+            }
+
+            function cambiarModoFeed(titulo) {
+                document.getElementById('feed-title').innerText = titulo;
+                document.getElementById('btn-close-filter').style.display = 'inline-block';
+                document.getElementById('btn-refresh').style.display = 'none';
+            }
+
+            window.restaurarFeed = () => {
+                document.getElementById('searchInput').value = '';
+                filtroActual = { tipo: 'ninguno', valor: '' };
+                document.getElementById('feed-title').innerText = 'LÍNEA DE TIEMPO';
+                document.getElementById('btn-close-filter').style.display = 'none';
+                document.getElementById('btn-refresh').style.display = 'inline-block';
+                aplicarFiltroActual();
+            };
+
+            // Aplica el filtro en memoria y renderiza (Inmediato)
+            function aplicarFiltroActual() {
+                let filtrados = globalRoosters;
+                if (filtroActual.tipo === 'detalle') {
+                    filtrados = globalRoosters.filter(r => r.id === filtroActual.valor);
+                } else if (filtroActual.tipo === 'usuario') {
+                    filtrados = globalRoosters.filter(r => r.author === filtroActual.valor);
+                } else if (filtroActual.tipo === 'tendencia') {
+                    filtrados = globalRoosters.filter(r => r.content.toLowerCase().includes(filtroActual.valor));
+                } else if (filtroActual.tipo === 'busqueda') {
+                    filtrados = globalRoosters.filter(r => r.content.toLowerCase().includes(filtroActual.valor) || r.author.toLowerCase().includes(filtroActual.valor));
+                }
+                renderizarFeedCentral(filtrados);
+            }
+
             // --- AUTH ---
             auth.onAuthStateChanged(user => {
                 if (user) {
@@ -396,6 +385,7 @@
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(), expireAt: exp, votes: 0, votedBy: []
                 });
                 document.getElementById('roostInput').value = ""; checkInput();
+                restaurarFeed(); // Vuelve al feed normal al publicar
             }
 
             window.votar = (id, n) => {
@@ -407,44 +397,33 @@
                 });
             }
 
-            // --- BUSCADOR ---
-            window.filtrarBusqueda = () => {
-                const texto = document.getElementById('searchInput').value.toLowerCase();
-                if(!texto) { renderizarFeedCentral(globalRoosters); return; }
-                const filtrados = globalRoosters.filter(r => r.content.toLowerCase().includes(texto) || r.author.toLowerCase().includes(texto));
-                renderizarFeedCentral(filtrados);
-            }
-
+            // --- ESCUCHA DE LA BASE DE DATOS (NÚCLEO DEL TIEMPO REAL) ---
             function cargarRoosters() {
                 db.collection("roosters").orderBy("createdAt", "desc").onSnapshot(snap => {
                     const lista = [];
                     snap.forEach(d => lista.push({id: d.id, ...d.data()}));
                     globalRoosters = lista;
                     
-                    const textoBusqueda = document.getElementById('searchInput').value;
-                    if(textoBusqueda) window.filtrarBusqueda(); else renderizarFeedCentral(lista);
-                    
+                    // Cuando entra nueva información, aplicamos el filtro activo inmediatamente
+                    aplicarFiltroActual();
                     actualizarSidebarIzquierda(lista);
                 });
             }
 
             // --- RENDERIZADO LATERAL ---
             function actualizarSidebarIzquierda(lista) {
-                // 1. Top Users
                 const conteo = {};
                 lista.forEach(r => conteo[r.author] = (conteo[r.author] || 0) + 1);
                 const ranking = Object.entries(conteo).sort((a,b) => b[1] - a[1]).slice(0, 5);
                 const topDiv = document.getElementById('left-top-users');
                 topDiv.innerHTML = "";
-                ranking.forEach((u, i) => topDiv.innerHTML += `<div class="mini-list-item rank-user"><span>${i+1}. @${u[0]}</span><span class="rank-badge">${u[1]} pt</span></div>`);
+                ranking.forEach((u, i) => topDiv.innerHTML += `<div class="mini-list-item rank-user" onclick="verUsuario('${u[0]}')"><span>${i+1}. @${u[0]}</span><span class="rank-badge">${u[1]} pt</span></div>`);
 
-                // 2. Perfil
                 const misPosts = lista.filter(r => r.uid === currentUser.uid).slice(0, 3);
                 const profDiv = document.getElementById('left-profile-feed');
                 profDiv.innerHTML = misPosts.length ? "" : '<div style="font-size:0.85rem; color:var(--text-sub);">Sin actividad aún.</div>';
-                misPosts.forEach(r => profDiv.innerHTML += `<div class="mini-list-item" style="color:#aaa;">"${r.content.substring(0,30)}..."</div>`);
+                misPosts.forEach(r => profDiv.innerHTML += `<div class="mini-list-item" style="color:#aaa;" onclick="verDetalleRoost('${r.id}')">"${r.content.substring(0,30)}..."</div>`);
 
-                // 3. ROOSTRENDS
                 const todosLosTextos = lista.map(r => r.content).join(" ");
                 const hashtags = todosLosTextos.match(/#[\wñáéíóú]+/gi) || [];
                 const conteoTags = {};
@@ -456,7 +435,7 @@
                 if (rankingTags.length > 0) {
                     rankingTags.forEach(t => {
                         trendsDiv.innerHTML += `
-                            <div class="mini-list-item rank-user" onclick="document.getElementById('searchInput').value='${t[0]}'; window.filtrarBusqueda();">
+                            <div class="mini-list-item rank-user" onclick="verTendencia('${t[0]}')">
                                 <span class="trend-tag">${t[0]}</span>
                                 <span class="trend-count">${t[1]} posts</span>
                             </div>`;
@@ -466,33 +445,35 @@
                 }
             }
 
+            // --- RENDERIZADO CENTRAL ---
             function renderizarFeedCentral(lista) {
                 const main = document.getElementById('main-feed');
-                const vip = document.getElementById('vip-feed');
                 const vipArea = document.getElementById('vip-area');
+                const vip = document.getElementById('vip-feed');
+                
                 main.innerHTML = ""; vip.innerHTML = "";
                 
-                // VIP
+                // VIP Area: Solo se dibuja si NO estamos viendo un filtro cerrado (estado 'ninguno')
                 const top = [...globalRoosters].sort((a,b)=>b.votes-a.votes).slice(0,5);
-                if(top.length>0 && top[0].votes>0) {
+                if(top.length>0 && top[0].votes>0 && filtroActual.tipo === 'ninguno') {
                     vipArea.style.display = "block";
                     top.forEach(r => {
                         if(r.votes<=0) return;
                         const yaVoto = r.votedBy && r.votedBy.includes(currentUser.uid);
                         vip.innerHTML += `
-                        <div class="vip-card">
+                        <div class="vip-card" onclick="verDetalleRoost('${r.id}')">
                             <div style="display:flex; justify-content:space-between; margin-bottom:8px; align-items: center;">
                                 <span style="color:var(--text-main); font-weight:600; font-size: 0.9rem;">@${r.author}</span>
                                 <span style="background:rgba(255,255,255,0.1); color:var(--text-main); padding:3px 8px; border-radius:10px; font-weight:600; font-size:0.75rem;">★ ${r.votes}</span>
                             </div>
-                            <div style="font-size:0.9rem; line-height:1.5; color:var(--text-sub); margin-bottom: 12px;">${r.content.substring(0,80)}...</div>
-                            <button ${yaVoto?'':'onclick="votar(\''+r.id+'\',1)"'} style="width:100%; background:${yaVoto?'rgba(76, 194, 255, 0.1)':'rgba(255,255,255,0.05)'}; border:1px solid ${yaVoto?'rgba(76, 194, 255, 0.3)':'rgba(255,255,255,0.1)'}; color:${yaVoto?'var(--accent-primary)':'var(--text-main)'}; border-radius:6px; padding:6px 0; font-size:0.85rem; cursor:${yaVoto?'default':'pointer'}; transition:0.2s;">${yaVoto?'✔ Votado':'▲ Votar'}</button>
+                            <div style="font-size:0.9rem; line-height:1.5; color:var(--text-sub); margin-bottom: 12px; white-space:pre-wrap;">${r.content.substring(0,80)}${r.content.length>80?'...':''}</div>
+                            <button ${yaVoto?'':'onclick="event.stopPropagation(); votar(\''+r.id+'\',1)"'} style="width:100%; background:${yaVoto?'rgba(76, 194, 255, 0.1)':'rgba(255,255,255,0.05)'}; border:1px solid ${yaVoto?'rgba(76, 194, 255, 0.3)':'rgba(255,255,255,0.1)'}; color:${yaVoto?'var(--accent-primary)':'var(--text-main)'}; border-radius:6px; padding:6px 0; font-size:0.85rem; cursor:${yaVoto?'default':'pointer'}; transition:0.2s;">${yaVoto?'✔ Roosted':'▲ Votar'}</button>
                         </div>`;
                     });
                 } else vipArea.style.display = "none";
 
-                // MAIN
-                if(lista.length === 0) { main.innerHTML = "<div style='padding:40px 20px; text-align:center; color:var(--text-sub);'>No se encontraron resultados.</div>"; return; }
+                // Main Feed
+                if(lista.length === 0) { main.innerHTML = "<div style='padding:40px 20px; text-align:center; color:var(--text-sub);'>No se encontraron resultados para esta vista.</div>"; return; }
 
                 lista.forEach(r => {
                     const yaVoto = r.votedBy && r.votedBy.includes(currentUser.uid);
